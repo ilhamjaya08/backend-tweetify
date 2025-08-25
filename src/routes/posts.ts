@@ -3,7 +3,7 @@ import type { Vars } from '../types/hono';
 import type { ResultSetHeader } from 'mysql2';
 import { db } from '../db/client';
 import { posts } from '../db/schema';
-import { desc } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { auth } from '../middlewares/auth';
 
@@ -31,5 +31,7 @@ postsRoute.post('/', auth, async (c) => {
   });
 
   const id = (res as unknown as ResultSetHeader).insertId;
-  return c.json({ id }, 201);
+  
+  const newPost = await db.select().from(posts).where(eq(posts.id, id)).limit(1);
+  return c.json(newPost[0], 201);
 });

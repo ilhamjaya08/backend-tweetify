@@ -3,6 +3,7 @@ import type { Vars } from '../types/hono';
 import type { ResultSetHeader } from 'mysql2';
 import { db } from '../db/client';
 import { comments } from '../db/schema';
+import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { auth } from '../middlewares/auth';
 
@@ -32,5 +33,7 @@ commentsRoute.post('/', auth, async (c) => {
   });
 
   const id = (res as unknown as ResultSetHeader).insertId;
-  return c.json({ id }, 201);
+  
+  const newComment = await db.select().from(comments).where(eq(comments.id, id)).limit(1);
+  return c.json(newComment[0], 201);
 });
